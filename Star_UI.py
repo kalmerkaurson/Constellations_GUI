@@ -56,7 +56,7 @@ class Window(Frame):
         self.frame52 = tk.Frame(self.frame51)
         self.button30 = tk.Button(self.frame52, command=self.select_mode)
         #self.img_cursor = tk.PhotoImage(file='cursor.png')
-        # IMAGES
+        # IMAGES tools
         filename = os.path.dirname(os.path.abspath(__file__))+"\\resources\\cursor.png"
         filename = filename.replace("\\", "/")
         selectimg = Image.open(filename)
@@ -126,18 +126,21 @@ class Window(Frame):
         self.frame59.pack(side='right')
         self.frame57.configure(background='#d7d7d7', height='200', width='200')
         self.frame57.pack(side='left')
-        '''
         # Pencil size
         self.frame1 = tk.Frame(self.frame20)
         self.label1 = tk.Label(self.frame1)
         self.label1.configure(background='#d7d7d7', text='Size', width='3')
         self.label1.pack(padx='5', pady='5', side='left')
+        self.pencil_size_value = tk.StringVar()
+        self.pencil_size_value.trace('w',self.on_field_change)
         self.combobox1 = ttk.Combobox(self.frame1)
-        self.combobox1.configure(width='6')
+        self.combobox1.configure(width='6', textvariable = self.pencil_size_value)
+        self.combobox1['values'] = ([i for i in range(1,201,1)])
+        self.combobox1.current(9)
         self.combobox1.pack(padx='5', pady='5', side='left')
         self.frame1.configure(background='#d7d7d7', height='200', width='200')
         self.frame1.pack(side='left')
-        # -----'''
+        # -----
         self.separator10 = ttk.Separator(self.frame20)
         self.separator10.configure(orient='vertical')
         self.separator10.pack(expand='false', fill='y', padx='5', pady='5', side='left')
@@ -187,6 +190,162 @@ class Window(Frame):
         self.frame32.pack(side='bottom')
         self.frame19.configure(height='200', width='200')
         self.frame19.pack(side='left')
+        # IMAGES views
+        filename = os.path.dirname(os.path.abspath(__file__))+"\\resources\\masks.png"
+        filename = filename.replace("\\", "/")
+        selectimg = Image.open(filename)
+        selectimg = selectimg.resize((60, 60), Image.ANTIALIAS)
+        self.img_masks = ImageTk.PhotoImage(selectimg)
+        
+        filename = os.path.dirname(os.path.abspath(__file__))+"\\resources\\edges.png"
+        filename = filename.replace("\\", "/")
+        selectimg = Image.open(filename)
+        selectimg = selectimg.resize((60, 60), Image.ANTIALIAS)
+        self.img_edges = ImageTk.PhotoImage(selectimg)
+        
+        filename = os.path.dirname(os.path.abspath(__file__))+"\\resources\\final.png"
+        filename = filename.replace("\\", "/")
+        selectimg = Image.open(filename)
+        selectimg = selectimg.resize((60, 60), Image.ANTIALIAS)
+        self.img_final = ImageTk.PhotoImage(selectimg)
+        # --------
+        # Masks and paramaters
+        self.separator1 = ttk.Separator(self.frame20)
+        self.separator1.configure(orient='vertical', takefocus=True)
+        self.separator1.pack(expand='false', fill='y', padx='5', pady='5', side='left')
+        self.frame2 = tk.Frame(self.frame20)
+        self.frame3 = tk.Frame(self.frame2)
+        
+        # Masks button
+        self.button1 = tk.Button(self.frame3, command=self.masks_view)
+        self.button1.configure(bitmap='error', compound='top', default='normal', font='TkDefaultFont')
+        self.button1.configure(height='60', image=self.img_masks, overrelief='flat', relief='raised')
+        self.button1.configure(repeatdelay='0', repeatinterval='0', takefocus=False)
+        self.button1.configure(width='60')
+        self.button1.pack(padx='5', pady='10', side='left')
+        self.frame3.configure(background='#d7d7d7', height='200', width='200')
+        self.frame3.pack(side='top')
+        self.frame4 = tk.Frame(self.frame2)
+        self.label2 = tk.Label(self.frame4)
+        self.label2.configure(background='#d7d7d7', state='normal', text='Masks', width='7')
+        self.label2.pack(padx='5', pady='5', side='left')
+        self.frame4.configure(background='#d7d7d7', height='200', width='200')
+        self.frame4.pack(side='right')
+        self.frame2.configure(background='#d7d7d7', height='200', width='200')
+        self.frame2.pack(side='left')
+        self.frame5 = tk.Frame(self.frame20)
+        self.frame6 = tk.Frame(self.frame5)
+        
+        # Edges button
+        self.button2 = tk.Button(self.frame6, command=self.edges_view)
+        self.button2.configure(bitmap='error', compound='top', default='normal', font='TkDefaultFont')
+        self.button2.configure(height='60', image=self.img_edges, overrelief='flat', relief='raised')
+        self.button2.configure(repeatdelay='0', repeatinterval='0', takefocus=False)
+        self.button2.configure(width='60')
+        self.button2.pack(padx='5', pady='10', side='left')
+        self.frame6.configure(background='#d7d7d7', height='200', width='200')
+        self.frame6.pack(side='top')
+        self.frame7 = tk.Frame(self.frame5)
+        self.label3 = tk.Label(self.frame7)
+        self.label3.configure(background='#d7d7d7', state='normal', text='Edge', width='7')
+        self.label3.pack(padx='5', pady='5', side='left')
+        self.frame7.configure(background='#d7d7d7', height='200', width='200')
+        self.frame7.pack(side='right')
+        self.frame5.configure(background='#d7d7d7', height='200', width='200')
+        self.frame5.pack(side='left')
+        self.frame8 = tk.Frame(self.frame20)
+        self.frame9 = tk.Frame(self.frame8)
+        
+        # Dotted button
+        self.button3 = tk.Button(self.frame9, command=self.dotted_view)
+        self.button3.configure(bitmap='error', compound='top', default='normal', font='TkDefaultFont')
+        self.button3.configure(height='60', image=self.img_final, overrelief='flat', relief='raised')
+        self.button3.configure(repeatdelay='0', repeatinterval='0', takefocus=False)
+        self.button3.configure(width='60')
+        self.button3.pack(padx='5', pady='10', side='left')
+        self.frame9.configure(background='#d7d7d7', height='200', width='200')
+        self.frame9.pack(side='top')
+        self.frame10 = tk.Frame(self.frame8)
+        self.label4 = tk.Label(self.frame10)
+        self.label4.configure(background='#d7d7d7', state='normal', text='Dots', width='7')
+        self.label4.pack(padx='5', pady='5', side='left')
+        self.frame10.configure(background='#d7d7d7', height='200', width='200')
+        self.frame10.pack(side='right')
+        self.frame8.configure(background='#d7d7d7', height='200', width='200')
+        self.frame8.pack(side='left')
+        self.separator2 = ttk.Separator(self.frame20)
+        self.separator2.configure(orient='vertical', takefocus=True)
+        self.separator2.pack(expand='false', fill='y', padx='5', pady='5', side='left')
+        self.frame21 = tk.Frame(self.frame20)
+        self.frame23 = tk.Frame(self.frame21)
+        self.label27 = tk.Label(self.frame23)
+        self.label27.configure(background='#d7d7d7', text='Canny edge parameters', width='18')
+        self.label27.pack(padx='5', pady='5', side='left')
+        self.frame23.configure(height='200', width='200', background='#d7d7d7')
+        self.frame23.pack(side='bottom')
+        self.frame41 = tk.Frame(self.frame21)
+        self.frame45 = tk.Frame(self.frame41)
+        self.frame46 = tk.Frame(self.frame45)
+        self.label34 = tk.Label(self.frame46)
+        self.label34.configure(background='#d7d7d7', text='Threshold 1', width='9')
+        self.label34.pack(padx='5', pady='5', side='left')
+
+        # Canny parameter 1
+        self.canny_param_1 = tk.StringVar()
+        self.canny_param_1.trace('w', self.update_edges)
+        self.combobox30 = ttk.Combobox(self.frame46, textvariable = self.canny_param_1)
+        self.combobox30['values'] = ([i for i in range(1,201,1)])
+        self.combobox30.current(79)
+        self.combobox30.configure(width='6')
+        self.combobox30.pack(padx='5', pady='5', side='left')
+        self.frame46.configure(background='#d7d7d7', height='200', width='200')
+        self.frame46.pack(side='top')
+        self.frame47 = tk.Frame(self.frame45)
+        self.label35 = tk.Label(self.frame47)
+        self.label35.configure(background='#d7d7d7', text='Threshold 2', width='9')
+        self.label35.pack(padx='5', pady='5', side='left')
+        
+        # Canny parameter 2
+        self.canny_param_2 = tk.StringVar()
+        self.canny_param_1.trace('w', self.update_edges)
+        self.combobox31 = ttk.Combobox(self.frame47, textvariable = self.canny_param_2)
+        self.combobox31['values'] = ([i for i in range(1,201,1)])
+        self.combobox31.current(199)
+        self.combobox31.configure(width='6')
+        self.combobox31.pack(padx='5', pady='5', side='left')
+        self.frame47.configure(background='#d7d7d7', height='200', width='200')
+        self.frame47.pack(side='top')
+        self.frame45.configure(height='200', width='200')
+        self.frame45.pack(side='left')
+        self.frame26 = ttk.Frame(self.frame41)
+        self.frame50 = tk.Frame(self.frame26)
+        self.frame60 = tk.Frame(self.frame50)
+        self.label40 = tk.Label(self.frame60)
+        self.label40.configure(background='#d7d7d7', text='ApetureSize', width='9')
+        self.label40.pack(padx='5', pady='5', side='left')
+        self.combobox36 = ttk.Combobox(self.frame60)
+        self.combobox36.configure(width='6')
+        self.combobox36.pack(padx='5', pady='5', side='left')
+        self.frame60.configure(background='#d7d7d7', height='200', width='200')
+        self.frame60.pack(side='top')
+        self.frame61 = tk.Frame(self.frame50)
+        self.label41 = tk.Label(self.frame61)
+        self.label41.configure(background='#d7d7d7', text='L2gradient', width='9')
+        self.label41.pack(padx='5', pady='5', side='left')
+        self.combobox37 = ttk.Combobox(self.frame61)
+        self.combobox37.configure(width='6')
+        self.combobox37.pack(padx='5', pady='5', side='left')
+        self.frame61.configure(background='#d7d7d7', height='200', width='200')
+        self.frame61.pack(side='top')
+        self.frame50.configure(height='200', width='200')
+        self.frame50.pack(side='top')
+        self.frame26.configure(height='200', width='200')
+        self.frame26.pack(side='left')
+        self.frame41.configure(height='200', width='200')
+        self.frame41.pack(side='top')
+        self.frame21.configure(height='200', width='200', background='#d7d7d7')
+        self.frame21.pack(side='left')
+        # -------------------
         self.frame20.configure(background='#d7d7d7', borderwidth='1', height='200', relief='raised')
         self.frame20.configure(width='200')
         self.frame20.pack(anchor='nw', expand='false', fill='x', side='top')
@@ -200,7 +359,28 @@ class Window(Frame):
     def onFrameConfigure(self, event):
         '''Reset the scroll region to encompass the inner frame'''
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        
+    def onCanvasConfigure(self, event):
+        self.canvas.itemconfig(self.window, width=event.width, height=event.height)
+        try:
+            self.width
+        except:
+            if (event.width<1800):
+                self.canvas.itemconfig(self.window, width=1800)
+            if (event.height<400):
+                self.canvas.itemconfig(self.window, height=400)
+        else:
+            if (event.width<self.width*3):
+                self.canvas.itemconfig(self.window, width=self.width*3+50)
+            if (event.height<self.height):
+                self.canvas.itemconfig(self.window, height=self.height*20+20)
     
+    def updateCanvasSize(self):
+        root.update_idletasks()
+        self.canvas.itemconfig(self.window, width=self.frame20.winfo_width())
+        self.canvas.itemconfig(self.window, height=self.frame14.winfo_height()-self.frame20.winfo_height())
+        
+        
     def init_canvas(self):
         #Scrollbar
         #everything in one window, paramaters on main window for canny detection,
@@ -211,7 +391,9 @@ class Window(Frame):
         self.canvas=Canvas(self.frame14)
         self.frame01 = tk.Frame(self.canvas)
         
-        self.frame62 = tk.Frame(self.frame01)
+        # Editing canvas layout frame
+        self.frame02 = tk.Frame(self.frame01)
+        self.frame62 = tk.Frame(self.frame02)
         self.canvas1 = tk.Canvas(self.frame62)
         self.canvas1.configure(background='#aac1c4')
         self.canvas1.bind("<Button-1>", self.get_x_and_y)
@@ -226,39 +408,76 @@ class Window(Frame):
         self.canvas3.configure(background='#aac1c4')
         self.canvas3.pack(anchor='center', expand='true', padx='10', pady='10', side='left')
         self.frame62.configure(background='#868686', height='200', width='200')
-        self.frame62.pack(anchor='n', expand='true', fill='both', side='bottom')
+        #self.frame62.pack(anchor='n', expand='true', fill='both', side='bottom')
+        self.frame62.pack(anchor='center', expand='true', fill='none', side='top')
+        self.frame02.configure(background='#768686', height='200', width='200')
+        self.frame02.pack(anchor='center', expand='true', fill='both', side='top')
+        self.frame02.pack_forget()
         
-        self.yscrollbar=Scrollbar(self.frame14,orient="vertical",command=self.canvas.yview)
+        # Mask buttons layout frame (top layer)
+        self.frame03 = tk.Frame(self.frame01)
+        self.frame04 = tk.Frame(self.frame03)
+        self.frame08 = tk.Frame(self.frame04)
+        self.mask_canvas1 = tk.Canvas(self.frame08)
+        self.mask_canvas1.configure(background='#aac1c4')
+        self.mask_canvas1.pack(anchor='center', expand='true', padx='10', pady='10', side='left')
+        self.mask_canvas2 = tk.Canvas(self.frame08)
+        self.mask_canvas2.configure(background='#aac1c4')
+        self.mask_canvas2.pack(anchor='center', expand='true', pady='10', side='left')
+        self.mask_canvas3 = tk.Canvas(self.frame08)
+        self.mask_canvas3.configure(background='#aac1c4')
+        self.mask_canvas3.pack(anchor='center', expand='true', padx='10', pady='10', side='left')
+        self.frame08.configure(background='#868686', height='200', width='200')
+        self.frame08.pack(anchor='center', expand='true', fill='none', side='top')
+        
+        # Mask buttons bottom layer
+        self.frame07 = tk.Frame(self.frame04)
+        self.mask_canvas4 = tk.Canvas(self.frame07)
+        self.mask_canvas4.configure(background='#aac1c4')
+        self.mask_canvas4.pack(anchor='center', expand='true', padx='10', pady='10', side='left')
+        self.mask_canvas5 = tk.Canvas(self.frame07)
+        self.mask_canvas5.configure(background='#aac1c4')
+        self.mask_canvas5.pack(anchor='center', expand='true', pady='10', side='left')
+        self.mask_canvas6 = tk.Canvas(self.frame07)
+        self.mask_canvas6.configure(background='#aac1c4')
+        self.mask_canvas6.pack(anchor='center', expand='true', padx='10', pady='10', side='left')
+        self.frame07.configure(background='#868686', height='200', width='200')
+        self.frame07.pack(anchor='center', expand='true', fill='none', side='bottom')
+        
+        self.frame04.configure(background='#868686', height='200', width='200')
+        self.frame04.pack(anchor='center', expand='true', fill='none', side='top')
+        self.frame03.configure(background='#768686', height='200', width='200')
+        self.frame03.pack(anchor='center', expand='true', fill='both', side='top')
+        #self.frame03.pack_forget()
+        
+        # Edges buttons layout frame
+        self.frame05 = tk.Frame(self.frame01)
+        self.frame06 = tk.Frame(self.frame05)
+        self.edges_canvas = tk.Canvas(self.frame06)
+        self.edges_canvas.configure(background='#aac1c4')
+        self.edges_canvas.pack(anchor='center', expand='true', padx='10', pady='10', side='left')
+        self.frame06.configure(background='#868686', height='200', width='200')
+        self.frame06.pack(anchor='center', expand='true', fill='none', side='top')
+        self.frame05.configure(background='#768686', height='200', width='200')
+        self.frame05.pack(anchor='center', expand='true', fill='both', side='top')
+        self.frame05.pack_forget()
+        
+        self.yscrollbar = Scrollbar(self.frame14, orient="vertical", command=self.canvas.yview)
         self.yscrollbar.pack(side="right",fill="y")
-        self.xscrollbar=Scrollbar(self.frame14,orient="horizontal",command=self.canvas.xview)
+        self.xscrollbar = Scrollbar(self.frame14, orient="horizontal", command=self.canvas.xview)
         self.xscrollbar.pack(side="bottom",fill="x")
         self.canvas.configure(background='#868686', height='0', width='0')
         self.canvas.configure(yscrollcommand=self.yscrollbar.set)
         self.canvas.configure(xscrollcommand=self.xscrollbar.set)
         self.canvas.pack(anchor='n', expand='true', fill='both', side='bottom')
-        self.canvas.create_window((0,0), window=self.frame01, anchor="nw",tags="self.frame")
+        self.window = self.canvas.create_window((0,0), window=self.frame01, anchor="nw", tags="self.frame01")
+        self.canvas.bind("<Configure>", self.onCanvasConfigure)
         self.frame01.bind("<Configure>", self.onFrameConfigure)
-        #-------
         
-        '''
-        #New canvas
-        self.frame62 = tk.Frame(self.frame14)
-        self.canvas1 = tk.Canvas(self.frame62)
-        self.canvas1.configure(background='#aac1c4')
-        self.canvas1.bind("<Button-1>", self.get_x_and_y)
-        self.canvas1.bind("<B1-Motion>", self.draw_smth)
-        self.canvas1.bind("<ButtonRelease-1>", self.check_changes)
-        #self.canvas1.bind("<B1-Motion>", self.erase_smth)
-        self.canvas1.pack(anchor='center', expand='true', padx='10', pady='10', side='left')
-        self.canvas2 = tk.Canvas(self.frame62)
-        self.canvas2.configure(background='#aac1c4')
-        self.canvas2.pack(anchor='center', expand='true', pady='10', side='left')
-        self.canvas3 = tk.Canvas(self.frame62)
-        self.canvas3.configure(background='#aac1c4')
-        self.canvas3.pack(anchor='center', expand='true', padx='10', pady='10', side='left')
-        self.frame62.configure(background='#868686', height='200', width='200')
-        self.frame62.pack(anchor='n', expand='true', fill='both', side='bottom')
-        '''
+        ## middle mode
+        #self.frame01.pack(anchor='n', expand='true', fill='both', side='bottom')
+        ##
+        #-------
 
     def loading_screen(self):
         self.temp_win = Toplevel()
@@ -266,75 +485,66 @@ class Window(Frame):
         self.message_label.pack()
         return "test"
     
-    def init_preview_panel(self, filename):
-        # Converting image to jpg
-        '''
-        image1 = Image.open(filename)
-        filename = os.path.dirname(os.path.abspath(__file__))+'\\temp\\temp_jpg_img.jpg'
-        filename = filename.replace("\\", "/")
-        image1 = image1.convert('RGB')
-        image1.save(filename)'''
+    def masks_view(self):
+        self.frame03.pack(anchor='center', expand='true', fill='both', side='top')
+        self.frame02.pack_forget()
+        self.frame05.pack_forget()
+    
+    def dotted_view(self):
+        self.frame02.pack(anchor='center', expand='true', fill='both', side='top')
+        self.frame03.pack_forget()
+        self.frame05.pack_forget()
+    
+    def edges_view(self):
+        self.frame05.pack(anchor='center', expand='true', fill='both', side='top')
+        self.frame03.pack_forget()
+        self.frame02.pack_forget()
+
+    def masks_panel(self, filename):
+        # Converting image to jpg (image error)
+        if (filename.endswith(".png")):
+            image1 = Image.open(filename)
+            filename = os.path.dirname(os.path.abspath(__file__))+'\\temp\\temp_jpg_img.jpg'
+            filename = filename.replace("\\", "/")
+            image1 = image1.convert('RGB')
+            image1.save(filename)
+        
         
         with open(filename, 'rb') as f:
             np_image_string = np.array([f.read()])
         
         image = Image.open(filename)
-        width, height = image.size
+        self.width, self.height = image.size
         
-        splash = Splash(self)
-        
-        segmentations = modules.detect(np_image_string,width,height)
-        splash.destroy()
-        #self.temp_win.destroy()
-        self.newWindow = Toplevel(self.master)
- 
-        # sets the title of the
-        # Toplevel widget
-        self.newWindow.title("Mask Selector")
-        
-        
+        segmentations = modules.detect(np_image_string,self.width,self.height)
+
         seg_length = len(segmentations)
         if (len(segmentations)>=3):
             seg_length = 3
-        # sets the geometry of mask selector
-        self.newWindow.geometry(str(width*seg_length)+"x"+str(height+80))#default 200x200
         
-        #Parameters frame
-        self.frame68 = tk.Frame(self.newWindow)
-        # Paramaters for Canny edge detection
-        self.frame70 = tk.Frame(self.frame68)
-        self.label47 = tk.Label(self.frame70)
-        self.label47.configure(text='parameter 1', width='11')
-        self.label47.pack(padx='5', pady='5', side='top')
-        self.canny_param_1 = tk.DoubleVar()
-        self.parameter_1 = Scale(self.frame70, from_=0, to=200, orient=HORIZONTAL, variable = self.canny_param_1)
-        self.parameter_1.set(80)
-        self.parameter_1.pack(side='top')
-        self.frame70.pack(anchor='n', expand='false', fill='both', side='left')
-        
-        self.frame71 = tk.Frame(self.frame68)
-        self.label48 = tk.Label(self.frame71)
-        self.label48.configure(text='parameter 2', width='11')
-        self.label48.pack(padx='5', pady='5', side='top')
-        
-        self.canny_param_2 = tk.DoubleVar()
-        self.parameter_2 = Scale(self.frame71, from_=0, to=200, orient=HORIZONTAL, variable = self.canny_param_2)
-        self.parameter_2.set(200)
-        self.parameter_2.pack(side='top')
-        self.frame71.pack(anchor='n', expand='false', fill='both', side='left')
-        #self.canny_param_3 = tk.DoubleVar()
-        #self.parameter_3 = Scale(self.frame68, from_=0, to=10, orient=HORIZONTAL, variable = self.canny_param_3)
-        #self.parameter_3.pack()
-        self.frame68.pack(anchor='n', expand='false', fill='both', side='top')
-        
-        #Segmentations frame
-        self.frame69 = tk.Frame(self.newWindow)
         # Converting segmentations from 0 and 1 into 0 and 255
         for i in range(len(segmentations)):
             segmentations[i] = segmentations[i].astype('uint8')*255
         
+        self.masks_view()
+        
+        try:
+            self.mask1.destroy()
+            self.mask2.destroy()
+            self.mask3.destroy()
+            self.mask4.destroy()
+            self.mask5.destroy()
+            self.mask6.destroy()
+            self.mask_canvas1.pack_forget()
+            self.mask_canvas2.pack_forget()
+            self.mask_canvas3.pack_forget()
+            self.mask_canvas4.pack_forget()
+            self.mask_canvas5.pack_forget()
+            self.mask_canvas6.pack_forget()
+        except:
+            pass
+        
         for i in range(seg_length):
-            #print(segmentations[i])
             data = Image.fromarray(segmentations[i])
             segme = segmentations[i]
             if (i+1==3):
@@ -342,13 +552,111 @@ class Window(Frame):
                 segme = segmentations[0] + segmentations[1] + segmentations[2]
             photo= ImageTk.PhotoImage(data)
             
-            mask1 = filename
             # EXTREMELY CRUTIAL DONT REMOVE
-            imagetest= Label(self.newWindow, image= photo)
+            imagetest= Label(self, image= photo)
             imagetest.image= photo
-            #editor_mode(self, original_image, segmentation):
-            Button(self.frame69, text = 'Click Me !', image = photo, command = lambda:  [self.editor_mode(image, segme), self.newWindow.destroy()]).pack(side = LEFT)
-        self.frame69.pack(anchor='n', expand='true', fill='both', side='top')
+            if (i==0):
+                self.mask_canvas1.pack(anchor='center', expand='true', padx='10', pady='10', side='left')
+                self.mask1 = Button(self.mask_canvas1, text = 'Click Me !', image = photo, command = lambda:  [self.edges_panel(image, segme)])
+                self.mask1.pack(side = LEFT)
+            if (i==1):
+                self.mask_canvas2.pack(anchor='center', expand='true', pady='10', side='left')
+                self.mask2 = Button(self.mask_canvas2, text = 'Click Me !', image = photo, command = lambda:  [self.edges_panel(image, segme)])
+                self.mask2.pack(side = LEFT)
+            if (i==2):
+                self.mask_canvas3.pack(anchor='center', expand='true', padx='10', pady='10', side='left')
+                self.mask3 = Button(self.mask_canvas3, text = 'Click Me !', image = photo, command = lambda:  [self.edges_panel(image, segme)])
+                self.mask3.pack(side = LEFT)
+        
+        if (seg_length==3):
+            # Combination 1
+            data1 = Image.fromarray(segmentations[0] + segmentations[1])
+            segme1 = segmentations[0] + segmentations[1]
+            photo= ImageTk.PhotoImage(data1)
+            imagetest= Label(self, image= photo)
+            imagetest.image= photo
+            self.mask_canvas4.pack(anchor='center', expand='true', padx='10', pady='10', side='left')
+            self.mask4 = Button(self.mask_canvas4, text = 'Click Me !', image = photo, command = lambda:  [self.edges_panel(image, segme1)])
+            self.mask4.pack(side = LEFT)
+            
+            # Combination 2
+            data2 = Image.fromarray(segmentations[2] + segmentations[1])
+            segme2 = segmentations[2] + segmentations[1]
+            photo= ImageTk.PhotoImage(data2)
+            imagetest= Label(self, image= photo)
+            imagetest.image= photo
+            self.mask_canvas5.pack(anchor='center', expand='true', pady='10', side='left')
+            self.mask5 = Button(self.mask_canvas5, text = 'Click Me !', image = photo, command = lambda:  [self.edges_panel(image, segme2)])
+            self.mask5.pack(side = LEFT)
+            
+            # Combination 3
+            data3 = Image.fromarray(segmentations[0] + segmentations[2])
+            segme3 = segmentations[0] + segmentations[2]
+            photo= ImageTk.PhotoImage(data3)
+            imagetest= Label(self, image= photo)
+            imagetest.image= photo
+            self.mask_canvas6.pack(anchor='center', expand='true', padx='10', pady='10', side='left')
+            self.mask6 = Button(self.mask_canvas6, text = 'Click Me !', image = photo, command = lambda:  [self.edges_panel(image, segme3)])
+            self.mask6.pack(side = LEFT)
+    
+    def edges_panel(self, original_image, segmentation):
+        
+        self.edges_view()
+        
+        try:
+            self.edges_selector.destroy()
+        except:
+            pass
+        
+        self.original_image = original_image
+        image = np.array(original_image)
+        self.seg = segmentation # one may have to chose 1,2 or 3 shapes here
+        self.seg[np.where(self.seg>0) ]=1
+        for l in range(3):
+            image[:,:,l]= image[:,:,l]*self.seg
+        edges_out = cv2.Canny(self.seg,1,1) # segment outer edge, some images may look better not including this
+        image = cv2.blur(image, (3,3))
+        edges = cv2.Canny(image,int(self.canny_param_1.get()),int(self.canny_param_2.get())) # the parameters of this is one choice that user may have to make # 80, 200
+        edges = edges | edges_out # again some images may look better without the outser edge
+        
+        photo = ImageTk.PhotoImage(Image.fromarray(edges))
+        
+        # EXTREMELY CRUTIAL DONT REMOVE
+        imagetest= Label(self, image= photo)
+        imagetest.image= photo
+        self.edges_selector = Button(self.edges_canvas, text = 'Click Me !', image = photo, command = lambda:  [self.editor_mode(image, segmentation)])
+        self.edges_selector.pack(side = LEFT)
+        
+        self.updateCanvasSize()
+    
+    def update_edges(self, index, value, op):
+        try:
+            self.edges_selector.destroy()
+        except:
+            pass
+        
+        try:
+            image = np.array(self.original_image)
+        except:
+            return
+        
+        self.seg[np.where(self.seg>0) ]=1
+        for l in range(3):
+            image[:,:,l]= image[:,:,l]*self.seg
+        edges_out = cv2.Canny(self.seg,1,1) # segment outer edge, some images may look better not including this
+        image = cv2.blur(image, (3,3))
+        edges = cv2.Canny(image,int(self.canny_param_1.get()),int(self.canny_param_2.get())) # the parameters of this is one choice that user may have to make # 80, 200
+        edges = edges | edges_out # again some images may look better without the outser edge
+        
+        photo = ImageTk.PhotoImage(Image.fromarray(edges))
+        
+        # EXTREMELY CRUTIAL DONT REMOVE
+        imagetest= Label(self, image= photo)
+        imagetest.image= photo
+        self.edges_selector = Button(self.edges_canvas, text = 'Click Me !', image = photo, command = lambda:  [self.editor_mode(image, self.seg)])
+        self.edges_selector.pack(side = LEFT)
+        
+        self.updateCanvasSize()
 
 
     #Creation of init_window
@@ -367,7 +675,7 @@ class Window(Frame):
         file.add_command(label="Open File", command=self.open_file)
         file.add_command(label="Open Project", command=self.open_file)
         file.add_command(label="Save Project", command=self.save_files)
-        file.add_command(label="Save File", command=quit)
+        #file.add_command(label="Save File", command=quit)
         file.add_command(label="Exit", command=quit)#command=self.client_exit
 
         menu.add_cascade(label="File", menu=file)
@@ -387,7 +695,8 @@ class Window(Frame):
         filename = filedialog.askopenfilename(parent=root, title='Choose a file', filetypes=[
             ('image files', ('.png', '.jpg')),])
         if filename:
-            self.init_preview_panel(filename)
+            self.masks_panel(filename)
+            #self.init_preview_panel(filename)
     
     def save_files(self):
         global imagelabel
@@ -396,14 +705,38 @@ class Window(Frame):
             #Need to add folder location
             ps = self.canvas1.postscript()#file = "canvas1_temp.ps"                         
             im = self.open_eps(ps, dpi=144)#144 was the only number that wouldnt create issues
-            print(foldername)
             im.save(foldername+"/edges.ps", dpi=(144, 144))#119.5
             img = Image.open(foldername+"/edges" + '.ps')
             w, h = img.size
-            img = img.crop([1, 1, w-3, h-3])
+            img = img.crop([1, 0, w-2, h-3])
             img.save(foldername+"/edges" + '.png', 'png')
+            #print(str(self.width) +" "+ str(self.height))
+            #print(img.size)
+            # Dotted
+            ps = self.canvas2.postscript()#file = "canvas1_temp.ps"                         
+            im = self.open_eps(ps, dpi=144)#144 was the only number that wouldnt create issues
+            im.save(foldername+"/dotted.ps", dpi=(144, 144))#119.5
+            img = Image.open(foldername+"/dotted" + '.ps')
+            w, h = img.size
+            img = img.crop([1, 0, w-2, h-3])
+            img.save(foldername+"/dotted" + '.png', 'png')
+            # Final
+            ps = self.canvas3.postscript()#file = "canvas1_temp.ps"                         
+            im = self.open_eps(ps, dpi=144)#144 was the only number that wouldnt create issues
+            im.save(foldername+"/final.ps", dpi=(144, 144))#119.5
+            img = Image.open(foldername+"/final" + '.ps')
+            w, h = img.size
+            img = img.crop([1, 0, w-2, h-3])
+            img.save(foldername+"/final" + '.png', 'png')
+    
+    
     
     def editor_mode(self, original_image, segmentation):
+        
+        self.frame02.pack(anchor='center', expand='true', fill='both', side='top')
+        self.frame03.pack_forget()
+        self.frame05.pack_forget()
+        
         global isEditable
         try:
             isEditable
@@ -445,10 +778,8 @@ class Window(Frame):
         self.photo_final = ImageTk.PhotoImage(Image.fromarray(final))
         self.canvas3.config(width=self.photo_final.width()-2, height=self.photo_final.height()-2)
         self.canvas3.create_image(0, 0, image = self.photo_final, anchor = NW)
-        '''
-        self.image_noise = Label(self.canvas3, image= photo)
-        self.image_noise.image = photo
-        self.image_noise.pack(side=tk.LEFT)'''
+        
+        self.updateCanvasSize()
     
     
     def get_x_and_y(self, event):
@@ -463,18 +794,21 @@ class Window(Frame):
             return
         else:
             if (usepen):
-                self.canvas1.create_line((lasx, lasy, event.x, event.y), 
-                                  fill='white', 
-                                  width=2)
+                #self.canvas1.create_line((lasx, lasy, event.x, event.y), 
+                                  #fill='white', 
+                                  #width=self.pencil_size_value.get())
+                self.canvas1.create_oval((lasx, lasy, event.x, event.y), 
+                                  fill='white', outline='white',
+                                  width=self.pencil_size_value.get())
         try:
             useEraser
         except NameError:
             return
         else:
             if (useEraser):
-                self.canvas1.create_line((lasx, lasy, event.x, event.y), 
+                self.canvas1.create_oval((lasx, lasy, event.x, event.y), 
                                   fill='black', 
-                                  width=2)
+                                  width=self.pencil_size_value.get())
         lasx, lasy = event.x, event.y
     
     def check_changes(self, event):
@@ -524,7 +858,7 @@ class Window(Frame):
         im.save("tester.ps", dpi=(144, 144))#119.5
         img = Image.open("tester" + '.ps')
         w, h = img.size
-        img = img.crop([1, 1, w-3, h-3])
+        img = img.crop([1, 0, w-2, h-3])
         img.save("tester" + '.png', 'png')
         
         img = cv2.imread("tester.png")
@@ -539,6 +873,7 @@ class Window(Frame):
         self.photo_final = ImageTk.PhotoImage(Image.fromarray(final))
         self.canvas3.config(width=self.photo_final.width()-2, height=self.photo_final.height()-2)
         self.canvas3.create_image(0, 0, image = self.photo_final, anchor = NW)
+        #print(self.photo_final.width())
     
     def select_mode(self):
         global usepen
@@ -597,291 +932,21 @@ class Splash(tk.Toplevel):
         ## required to make window show before the program gets to the mainloop
         self.update()
 
-class AutoScrollbar(ttk.Scrollbar):
-    ''' A scrollbar that hides itself if its not needed.
-        Works only if you use the grid geometry manager '''
-    def set(self, lo, hi):
-        if float(lo) <= 0.0 and float(hi) >= 1.0:
-            self.grid_remove()
-        else:
-            self.grid()
-            ttk.Scrollbar.set(self, lo, hi)
-
-    def pack(self, **kw):
-        raise tk.TclError('Cannot use pack with this widget')
-
-    def place(self, **kw):
-        raise tk.TclError('Cannot use place with this widget')
-
-class CanvasImage:
-    """ Display and zoom image """
-    def __init__(self, placeholder, path):
-        """ Initialize the ImageFrame """
-        self.imscale = 1.0  # scale for the canvas image zoom, public for outer classes
-        self.__delta = 1.3  # zoom magnitude
-        self.__filter = Image.ANTIALIAS  # could be: NEAREST, BILINEAR, BICUBIC and ANTIALIAS
-        self.__previous_state = 0  # previous state of the keyboard
-        self.path = path  # path to the image, should be public for outer classes
-        # Create ImageFrame in placeholder widget
-        self.__imframe = ttk.Frame(placeholder)  # placeholder of the ImageFrame object
-        # Vertical and horizontal scrollbars for canvas
-        hbar = AutoScrollbar(self.__imframe, orient='horizontal')
-        vbar = AutoScrollbar(self.__imframe, orient='vertical')
-        hbar.grid(row=1, column=0, sticky='we')
-        vbar.grid(row=0, column=1, sticky='ns')
-        # Create canvas and bind it with scrollbars. Public for outer classes
-        self.canvas = tk.Canvas(self.__imframe, highlightthickness=0,
-                                xscrollcommand=hbar.set, yscrollcommand=vbar.set)
-        self.canvas.grid(row=0, column=0, sticky='nswe')
-        self.canvas.update()  # wait till canvas is created
-        hbar.configure(command=self.__scroll_x)  # bind scrollbars to the canvas
-        vbar.configure(command=self.__scroll_y)
-        # Bind events to the Canvas
-        self.canvas.bind('<Configure>', lambda event: self.__show_image())  # canvas is resized
-        self.canvas.bind('<ButtonPress-1>', self.__move_from)  # remember canvas position
-        self.canvas.bind('<B1-Motion>',     self.__move_to)  # move canvas to the new position
-        self.canvas.bind('<MouseWheel>', self.__wheel)  # zoom for Windows and MacOS, but not Linux
-        self.canvas.bind('<Button-5>',   self.__wheel)  # zoom for Linux, wheel scroll down
-        self.canvas.bind('<Button-4>',   self.__wheel)  # zoom for Linux, wheel scroll up
-        # Handle keystrokes in idle mode, because program slows down on a weak computers,
-        # when too many key stroke events in the same time
-        self.canvas.bind('<Key>', lambda event: self.canvas.after_idle(self.__keystroke, event))
-        # Decide if this image huge or not
-        self.__huge = False  # huge or not
-        self.__huge_size = 14000  # define size of the huge image
-        self.__band_width = 1024  # width of the tile band
-        Image.MAX_IMAGE_PIXELS = 1000000000  # suppress DecompressionBombError for the big image
-        with warnings.catch_warnings():  # suppress DecompressionBombWarning
-            warnings.simplefilter('ignore')
-            self.__image = Image.open(self.path)  # open image, but down't load it
-        self.imwidth, self.imheight = self.__image.size  # public for outer classes
-        if self.imwidth * self.imheight > self.__huge_size * self.__huge_size and \
-           self.__image.tile[0][0] == 'raw':  # only raw images could be tiled
-            self.__huge = True  # image is huge
-            self.__offset = self.__image.tile[0][2]  # initial tile offset
-            self.__tile = [self.__image.tile[0][0],  # it have to be 'raw'
-                           [0, 0, self.imwidth, 0],  # tile extent (a rectangle)
-                           self.__offset,
-                           self.__image.tile[0][3]]  # list of arguments to the decoder
-        self.__min_side = min(self.imwidth, self.imheight)  # get the smaller image side
-        # Create image pyramid
-        self.__pyramid = [self.smaller()] if self.__huge else [Image.open(self.path)]
-        # Set ratio coefficient for image pyramid
-        self.__ratio = max(self.imwidth, self.imheight) / self.__huge_size if self.__huge else 1.0
-        self.__curr_img = 0  # current image from the pyramid
-        self.__scale = self.imscale * self.__ratio  # image pyramide scale
-        self.__reduction = 2  # reduction degree of image pyramid
-        w, h = self.__pyramid[-1].size
-        while w > 512 and h > 512:  # top pyramid image is around 512 pixels in size
-            w /= self.__reduction  # divide on reduction degree
-            h /= self.__reduction  # divide on reduction degree
-            self.__pyramid.append(self.__pyramid[-1].resize((int(w), int(h)), self.__filter))
-        # Put image into container rectangle and use it to set proper coordinates to the image
-        self.container = self.canvas.create_rectangle((0, 0, self.imwidth, self.imheight), width=0)
-        self.__show_image()  # show image on the canvas
-        self.canvas.focus_set()  # set focus on the canvas
-
-    def smaller(self):
-        """ Resize image proportionally and return smaller image """
-        w1, h1 = float(self.imwidth), float(self.imheight)
-        w2, h2 = float(self.__huge_size), float(self.__huge_size)
-        aspect_ratio1 = w1 / h1
-        aspect_ratio2 = w2 / h2  # it equals to 1.0
-        if aspect_ratio1 == aspect_ratio2:
-            image = Image.new('RGB', (int(w2), int(h2)))
-            k = h2 / h1  # compression ratio
-            w = int(w2)  # band length
-        elif aspect_ratio1 > aspect_ratio2:
-            image = Image.new('RGB', (int(w2), int(w2 / aspect_ratio1)))
-            k = h2 / w1  # compression ratio
-            w = int(w2)  # band length
-        else:  # aspect_ratio1 < aspect_ration2
-            image = Image.new('RGB', (int(h2 * aspect_ratio1), int(h2)))
-            k = h2 / h1  # compression ratio
-            w = int(h2 * aspect_ratio1)  # band length
-        i, j, n = 0, 1, round(0.5 + self.imheight / self.__band_width)
-        while i < self.imheight:
-            print('\rOpening image: {j} from {n}'.format(j=j, n=n), end='')
-            band = min(self.__band_width, self.imheight - i)  # width of the tile band
-            self.__tile[1][3] = band  # set band width
-            self.__tile[2] = self.__offset + self.imwidth * i * 3  # tile offset (3 bytes per pixel)
-            self.__image.close()
-            self.__image = Image.open(self.path)  # reopen / reset image
-            self.__image.size = (self.imwidth, band)  # set size of the tile band
-            self.__image.tile = [self.__tile]  # set tile
-            cropped = self.__image.crop((0, 0, self.imwidth, band))  # crop tile band
-            image.paste(cropped.resize((w, int(band * k)+1), self.__filter), (0, int(i * k)))
-            i += band
-            j += 1
-        print('\r' + 30*' ' + '\r', end='')  # hide printed string
-        return image
-
-    def redraw_figures(self):
-        """ Dummy function to redraw figures in the children classes """
-        pass
-
-    def grid(self, **kw):
-        """ Put CanvasImage widget on the parent widget """
-        self.__imframe.grid(**kw)  # place CanvasImage widget on the grid
-        self.__imframe.grid(sticky='nswe')  # make frame container sticky
-        self.__imframe.rowconfigure(0, weight=1)  # make canvas expandable
-        self.__imframe.columnconfigure(0, weight=1)
-
-    def pack(self, **kw):
-        """ Exception: cannot use pack with this widget """
-        raise Exception('Cannot use pack with the widget ' + self.__class__.__name__)
-
-    def place(self, **kw):
-        """ Exception: cannot use place with this widget """
-        raise Exception('Cannot use place with the widget ' + self.__class__.__name__)
-
-    # noinspection PyUnusedLocal
-    def __scroll_x(self, *args, **kwargs):
-        """ Scroll canvas horizontally and redraw the image """
-        self.canvas.xview(*args)  # scroll horizontally
-        self.__show_image()  # redraw the image
-
-    # noinspection PyUnusedLocal
-    def __scroll_y(self, *args, **kwargs):
-        """ Scroll canvas vertically and redraw the image """
-        self.canvas.yview(*args)  # scroll vertically
-        self.__show_image()  # redraw the image
-
-    def __show_image(self):
-        """ Show image on the Canvas. Implements correct image zoom almost like in Google Maps """
-        box_image = self.canvas.coords(self.container)  # get image area
-        box_canvas = (self.canvas.canvasx(0),  # get visible area of the canvas
-                      self.canvas.canvasy(0),
-                      self.canvas.canvasx(self.canvas.winfo_width()),
-                      self.canvas.canvasy(self.canvas.winfo_height()))
-        box_img_int = tuple(map(int, box_image))  # convert to integer or it will not work properly
-        # Get scroll region box
-        box_scroll = [min(box_img_int[0], box_canvas[0]), min(box_img_int[1], box_canvas[1]),
-                      max(box_img_int[2], box_canvas[2]), max(box_img_int[3], box_canvas[3])]
-        # Horizontal part of the image is in the visible area
-        if  box_scroll[0] == box_canvas[0] and box_scroll[2] == box_canvas[2]:
-            box_scroll[0]  = box_img_int[0]
-            box_scroll[2]  = box_img_int[2]
-        # Vertical part of the image is in the visible area
-        if  box_scroll[1] == box_canvas[1] and box_scroll[3] == box_canvas[3]:
-            box_scroll[1]  = box_img_int[1]
-            box_scroll[3]  = box_img_int[3]
-        # Convert scroll region to tuple and to integer
-        self.canvas.configure(scrollregion=tuple(map(int, box_scroll)))  # set scroll region
-        x1 = max(box_canvas[0] - box_image[0], 0)  # get coordinates (x1,y1,x2,y2) of the image tile
-        y1 = max(box_canvas[1] - box_image[1], 0)
-        x2 = min(box_canvas[2], box_image[2]) - box_image[0]
-        y2 = min(box_canvas[3], box_image[3]) - box_image[1]
-        if int(x2 - x1) > 0 and int(y2 - y1) > 0:  # show image if it in the visible area
-            if self.__huge and self.__curr_img < 0:  # show huge image
-                h = int((y2 - y1) / self.imscale)  # height of the tile band
-                self.__tile[1][3] = h  # set the tile band height
-                self.__tile[2] = self.__offset + self.imwidth * int(y1 / self.imscale) * 3
-                self.__image.close()
-                self.__image = Image.open(self.path)  # reopen / reset image
-                self.__image.size = (self.imwidth, h)  # set size of the tile band
-                self.__image.tile = [self.__tile]
-                image = self.__image.crop((int(x1 / self.imscale), 0, int(x2 / self.imscale), h))
-            else:  # show normal image
-                image = self.__pyramid[max(0, self.__curr_img)].crop(  # crop current img from pyramid
-                                    (int(x1 / self.__scale), int(y1 / self.__scale),
-                                     int(x2 / self.__scale), int(y2 / self.__scale)))
-            #
-            imagetk = ImageTk.PhotoImage(image.resize((int(x2 - x1), int(y2 - y1)), self.__filter))
-            imageid = self.canvas.create_image(max(box_canvas[0], box_img_int[0]),
-                                               max(box_canvas[1], box_img_int[1]),
-                                               anchor='nw', image=imagetk)
-            self.canvas.lower(imageid)  # set image into background
-            self.canvas.imagetk = imagetk  # keep an extra reference to prevent garbage-collection
-
-    def __move_from(self, event):
-        """ Remember previous coordinates for scrolling with the mouse """
-        self.canvas.scan_mark(event.x, event.y)
-
-    def __move_to(self, event):
-        """ Drag (move) canvas to the new position """
-        self.canvas.scan_dragto(event.x, event.y, gain=1)
-        self.__show_image()  # zoom tile and show it on the canvas
-
-    def outside(self, x, y):
-        """ Checks if the point (x,y) is outside the image area """
-        bbox = self.canvas.coords(self.container)  # get image area
-        if bbox[0] < x < bbox[2] and bbox[1] < y < bbox[3]:
-            return False  # point (x,y) is inside the image area
-        else:
-            return True  # point (x,y) is outside the image area
-
-    def __wheel(self, event):
-        """ Zoom with mouse wheel """
-        x = self.canvas.canvasx(event.x)  # get coordinates of the event on the canvas
-        y = self.canvas.canvasy(event.y)
-        if self.outside(x, y): return  # zoom only inside image area
-        scale = 1.0
-        # Respond to Linux (event.num) or Windows (event.delta) wheel event
-        if event.num == 5 or event.delta == -120:  # scroll down, smaller
-            if round(self.__min_side * self.imscale) < 30: return  # image is less than 30 pixels
-            self.imscale /= self.__delta
-            scale        /= self.__delta
-        if event.num == 4 or event.delta == 120:  # scroll up, bigger
-            i = min(self.canvas.winfo_width(), self.canvas.winfo_height()) >> 1
-            if i < self.imscale: return  # 1 pixel is bigger than the visible area
-            self.imscale *= self.__delta
-            scale        *= self.__delta
-        # Take appropriate image from the pyramid
-        k = self.imscale * self.__ratio  # temporary coefficient
-        self.__curr_img = min((-1) * int(math.log(k, self.__reduction)), len(self.__pyramid) - 1)
-        self.__scale = k * math.pow(self.__reduction, max(0, self.__curr_img))
-        #
-        self.canvas.scale('all', x, y, scale, scale)  # rescale all objects
-        # Redraw some figures before showing image on the screen
-        self.redraw_figures()  # method for child classes
-        self.__show_image()
-
-    def __keystroke(self, event):
-        """ Scrolling with the keyboard.
-            Independent from the language of the keyboard, CapsLock, <Ctrl>+<key>, etc. """
-        if event.state - self.__previous_state == 4:  # means that the Control key is pressed
-            pass  # do nothing if Control key is pressed
-        else:
-            self.__previous_state = event.state  # remember the last keystroke state
-            # Up, Down, Left, Right keystrokes
-            if event.keycode in [68, 39, 102]:  # scroll right: keys 'D', 'Right' or 'Numpad-6'
-                self.__scroll_x('scroll',  1, 'unit', event=event)
-            elif event.keycode in [65, 37, 100]:  # scroll left: keys 'A', 'Left' or 'Numpad-4'
-                self.__scroll_x('scroll', -1, 'unit', event=event)
-            elif event.keycode in [87, 38, 104]:  # scroll up: keys 'W', 'Up' or 'Numpad-8'
-                self.__scroll_y('scroll', -1, 'unit', event=event)
-            elif event.keycode in [83, 40, 98]:  # scroll down: keys 'S', 'Down' or 'Numpad-2'
-                self.__scroll_y('scroll',  1, 'unit', event=event)
-
-    def crop(self, bbox):
-        """ Crop rectangle from the image and return it """
-        if self.__huge:  # image is huge and not totally in RAM
-            band = bbox[3] - bbox[1]  # width of the tile band
-            self.__tile[1][3] = band  # set the tile height
-            self.__tile[2] = self.__offset + self.imwidth * bbox[1] * 3  # set offset of the band
-            self.__image.close()
-            self.__image = Image.open(self.path)  # reopen / reset image
-            self.__image.size = (self.imwidth, band)  # set size of the tile band
-            self.__image.tile = [self.__tile]
-            return self.__image.crop((bbox[0], 0, bbox[2], band))
-        else:  # image is totally in RAM
-            return self.__pyramid[0].crop(bbox)
-
-    def destroy(self):
-        """ ImageFrame destructor """
-        self.__image.close()
-        map(lambda i: i.close, self.__pyramid)  # close all pyramid images
-        del self.__pyramid[:]  # delete pyramid list
-        del self.__pyramid  # delete pyramid variable
-        self.canvas.destroy()
-        self.__imframe.destroy()
-
 
 # root window created.
 root = Tk()
 
-root.geometry("1280x800")
+window_height = 800
+window_width = 1280
+
+screen_width = root.winfo_screenwidth()
+screen_height = root.winfo_screenheight()
+
+x_cordinate = int((screen_width/2) - (window_width/2))
+y_cordinate = int((screen_height/2) - (window_height/2))
+
+root.geometry("{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_cordinate))
+#root.geometry("1280x800")
 app = Window(root)
 
 #mainloop 

@@ -1,2 +1,0 @@
-model_checkpoint_path: "my_test_model-1000_temp_95f36fd3cedd42889d8e4eb5a6603364/part-00000-of-00001"
-all_model_checkpoint_paths: "my_test_model-1000_temp_95f36fd3cedd42889d8e4eb5a6603364/part-00000-of-00001"
