@@ -483,7 +483,7 @@ class Window(Frame):
         self.temp_win = Toplevel()
         self.message_label = Label(self.temp_win , text = "Loading.. Please wait")
         self.message_label.pack()
-        return "test"
+        return "loading masks..."
     
     def masks_view(self):
         self.frame03.pack(anchor='center', expand='true', fill='both', side='top')
@@ -546,26 +546,31 @@ class Window(Frame):
         
         for i in range(seg_length):
             data = Image.fromarray(segmentations[i])
-            segme = segmentations[i]
-            if (i+1==3):
+            
+            '''
+            if (i==2):
                 data = Image.fromarray(segmentations[0] + segmentations[1] + segmentations[2])
-                segme = segmentations[0] + segmentations[1] + segmentations[2]
+                segme = segmentations[0] + segmentations[1] + segmentations[2]'''
             photo= ImageTk.PhotoImage(data)
             
             # EXTREMELY CRUTIAL DONT REMOVE
             imagetest= Label(self, image= photo)
             imagetest.image= photo
             if (i==0):
+                # Segmentations have to be saved as different variables because otherwise the buttons have the referance to the same segmentation
+                segme01 = segmentations[i]
                 self.mask_canvas1.pack(anchor='center', expand='true', padx='10', pady='10', side='left')
-                self.mask1 = Button(self.mask_canvas1, text = 'Click Me !', image = photo, command = lambda:  [self.edges_panel(image, segme)])
+                self.mask1 = Button(self.mask_canvas1, text = 'Click Me !', image = photo, command = lambda:  [self.edges_panel(image, segme01)])
                 self.mask1.pack(side = LEFT)
             if (i==1):
+                segme02 = segmentations[i]
                 self.mask_canvas2.pack(anchor='center', expand='true', pady='10', side='left')
-                self.mask2 = Button(self.mask_canvas2, text = 'Click Me !', image = photo, command = lambda:  [self.edges_panel(image, segme)])
+                self.mask2 = Button(self.mask_canvas2, text = 'Click Me !', image = photo, command = lambda:  [self.edges_panel(image, segme02)])
                 self.mask2.pack(side = LEFT)
             if (i==2):
+                segme03 = segmentations[i]
                 self.mask_canvas3.pack(anchor='center', expand='true', padx='10', pady='10', side='left')
-                self.mask3 = Button(self.mask_canvas3, text = 'Click Me !', image = photo, command = lambda:  [self.edges_panel(image, segme)])
+                self.mask3 = Button(self.mask_canvas3, text = 'Click Me !', image = photo, command = lambda:  [self.edges_panel(image, segme03)])
                 self.mask3.pack(side = LEFT)
         
         if (seg_length==3):

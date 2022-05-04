@@ -99,11 +99,11 @@ def detect(np_image_string,width,height):
     session = tf.compat.v1.Session()#tf.Session()
     #First let's load meta graph and restore weights
     
-    filename = os.path.dirname(os.path.abspath(__file__))+'\\test\\model\\my_test_model-1000.meta'
+    filename = os.path.dirname(os.path.abspath(__file__))+'\\savedmodel\\model\\my_test_model-1000.meta'
     filename = filename.replace("\\", "/")
 
     saver = tf.compat.v1.train.import_meta_graph(filename)#tf.train.import_meta_graph(filename)
-    filename = os.path.dirname(os.path.abspath(__file__))+'\\test\\model\\'
+    filename = os.path.dirname(os.path.abspath(__file__))+'\\savedmodel\\model\\'
     filename = filename.replace("\\", "/")
     saver.restore(session,tf.train.latest_checkpoint(filename+'./'))
     #session = tf.compat.v1.Session(graph=tf.Graph())
