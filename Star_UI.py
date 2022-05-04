@@ -307,7 +307,7 @@ class Window(Frame):
         
         # Canny parameter 2
         self.canny_param_2 = tk.StringVar()
-        self.canny_param_1.trace('w', self.update_edges)
+        self.canny_param_2.trace('w', self.update_edges)
         self.combobox31 = ttk.Combobox(self.frame47, textvariable = self.canny_param_2)
         self.combobox31['values'] = ([i for i in range(1,201,1)])
         self.combobox31.current(199)
@@ -323,7 +323,13 @@ class Window(Frame):
         self.label40 = tk.Label(self.frame60)
         self.label40.configure(background='#d7d7d7', text='ApetureSize', width='9')
         self.label40.pack(padx='5', pady='5', side='left')
-        self.combobox36 = ttk.Combobox(self.frame60)
+        
+        # Canny parameter 3
+        self.canny_param_3 = tk.StringVar()
+        self.canny_param_3.trace('w', self.update_edges)
+        self.combobox36 = ttk.Combobox(self.frame60, textvariable = self.canny_param_3)
+        self.combobox36['values'] = ([i for i in range(3,8,2)])
+        self.combobox36.current(0)
         self.combobox36.configure(width='6')
         self.combobox36.pack(padx='5', pady='5', side='left')
         self.frame60.configure(background='#d7d7d7', height='200', width='200')
@@ -332,7 +338,13 @@ class Window(Frame):
         self.label41 = tk.Label(self.frame61)
         self.label41.configure(background='#d7d7d7', text='L2gradient', width='9')
         self.label41.pack(padx='5', pady='5', side='left')
-        self.combobox37 = ttk.Combobox(self.frame61)
+        
+        # Canny parameter 4
+        self.canny_param_4 = tk.StringVar()
+        self.canny_param_4.trace('w', self.update_edges)
+        self.combobox37 = ttk.Combobox(self.frame61, textvariable = self.canny_param_4)
+        self.combobox37['values'] = [True, False]
+        self.combobox37.current(1)
         self.combobox37.configure(width='6')
         self.combobox37.pack(padx='5', pady='5', side='left')
         self.frame61.configure(background='#d7d7d7', height='200', width='200')
@@ -514,6 +526,7 @@ class Window(Frame):
             np_image_string = np.array([f.read()])
         
         image = Image.open(filename)
+        self.original_image = image
         self.width, self.height = image.size
         
         segmentations = modules.detect(np_image_string,self.width,self.height)
@@ -650,7 +663,7 @@ class Window(Frame):
             image[:,:,l]= image[:,:,l]*self.seg
         edges_out = cv2.Canny(self.seg,1,1) # segment outer edge, some images may look better not including this
         image = cv2.blur(image, (3,3))
-        edges = cv2.Canny(image,int(self.canny_param_1.get()),int(self.canny_param_2.get())) # the parameters of this is one choice that user may have to make # 80, 200
+        edges = cv2.Canny(image,int(self.canny_param_1.get()),int(self.canny_param_2.get()), apertureSize = int(self.canny_param_3.get()), L2gradient = False if self.canny_param_4.get()=="False" else True) # the parameters of this is one choice that user may have to make # 80, 200
         edges = edges | edges_out # again some images may look better without the outser edge
         
         photo = ImageTk.PhotoImage(Image.fromarray(edges))
@@ -705,34 +718,54 @@ class Window(Frame):
     
     def save_files(self):
         global imagelabel
-        foldername = filedialog.askdirectory()
-        if foldername:
-            #Need to add folder location
-            ps = self.canvas1.postscript()#file = "canvas1_temp.ps"                         
-            im = self.open_eps(ps, dpi=144)#144 was the only number that wouldnt create issues
-            im.save(foldername+"/edges.ps", dpi=(144, 144))#119.5
-            img = Image.open(foldername+"/edges" + '.ps')
-            w, h = img.size
-            img = img.crop([1, 0, w-2, h-3])
-            img.save(foldername+"/edges" + '.png', 'png')
-            #print(str(self.width) +" "+ str(self.height))
-            #print(img.size)
-            # Dotted
-            ps = self.canvas2.postscript()#file = "canvas1_temp.ps"                         
-            im = self.open_eps(ps, dpi=144)#144 was the only number that wouldnt create issues
-            im.save(foldername+"/dotted.ps", dpi=(144, 144))#119.5
-            img = Image.open(foldername+"/dotted" + '.ps')
-            w, h = img.size
-            img = img.crop([1, 0, w-2, h-3])
-            img.save(foldername+"/dotted" + '.png', 'png')
-            # Final
-            ps = self.canvas3.postscript()#file = "canvas1_temp.ps"                         
-            im = self.open_eps(ps, dpi=144)#144 was the only number that wouldnt create issues
-            im.save(foldername+"/final.ps", dpi=(144, 144))#119.5
-            img = Image.open(foldername+"/final" + '.ps')
-            w, h = img.size
-            img = img.crop([1, 0, w-2, h-3])
-            img.save(foldername+"/final" + '.png', 'png')
+        #foldername = filedialog.askdirectory()
+        folderlocation = filedialog.asksaveasfilename(filetypes=[('All Files', '*.*')])
+        if folderlocation:
+            try:
+                if (isEditable==True):
+                    directory = folderlocation.split("/")
+                    foldername = directory[-1]
+                    directory = directory[:-1]
+                    directory = "/".join(directory)
+                    
+                    # Path
+                    path = os.path.join(directory, foldername)
+                    # Create directory
+                    os.mkdir(path)
+                    
+                    self.original_image.save(folderlocation+"/original" + '.png', 'png')
+                    
+                    #Need to add folder location
+                    ps = self.canvas1.postscript()#file = "canvas1_temp.ps"                         
+                    im = self.open_eps(ps, dpi=144)#144 was the only number that wouldnt create issues
+                    im.save(folderlocation+"/edges.ps", dpi=(144, 144))#119.5
+                    img = Image.open(folderlocation+"/edges" + '.ps')
+                    w, h = img.size
+                    img = img.crop([1, 0, w-2, h-3])
+                    img.save(folderlocation+"/edges" + '.png', 'png')
+                    os.remove(folderlocation+"/edges" + '.ps')
+                    #print(str(self.width) +" "+ str(self.height))
+                    #print(img.size)
+                    # Dotted
+                    ps = self.canvas2.postscript()#file = "canvas1_temp.ps"                         
+                    im = self.open_eps(ps, dpi=144)#144 was the only number that wouldnt create issues
+                    im.save(folderlocation+"/dotted.ps", dpi=(144, 144))#119.5
+                    img = Image.open(folderlocation+"/dotted" + '.ps')
+                    w, h = img.size
+                    img = img.crop([1, 0, w-2, h-3])
+                    img.save(folderlocation+"/dotted" + '.png', 'png')
+                    os.remove(folderlocation+"/dotted" + '.ps')
+                    # Final
+                    ps = self.canvas3.postscript()#file = "canvas1_temp.ps"                         
+                    im = self.open_eps(ps, dpi=144)#144 was the only number that wouldnt create issues
+                    im.save(folderlocation+"/final.ps", dpi=(144, 144))#119.5
+                    img = Image.open(folderlocation+"/final" + '.ps')
+                    w, h = img.size
+                    img = img.crop([1, 0, w-2, h-3])
+                    img.save(folderlocation+"/final" + '.png', 'png')
+                    os.remove(folderlocation+"/final" + '.ps')
+            except NameError:
+                pass
     
     
     
@@ -767,7 +800,7 @@ class Window(Frame):
             image[:,:,l]= image[:,:,l]*seg
         edges_out = cv2.Canny(seg,1,1) # segment outer edge, some images may look better not including this
         image = cv2.blur(image, (3,3))
-        edges = cv2.Canny(image,int(self.canny_param_1.get()),int(self.canny_param_2.get())) # the parameters of this is one choice that user may have to make # 80, 200
+        edges = cv2.Canny(image,int(self.canny_param_1.get()),int(self.canny_param_2.get()), apertureSize = int(self.canny_param_3.get()), L2gradient = False if self.canny_param_4.get()=="False" else True) # the parameters of this is one choice that user may have to make # 80, 200
         edges = edges | edges_out # again some images may look better without the outser edge
         
         self.photo_edges = ImageTk.PhotoImage(Image.fromarray(edges))
