@@ -10,7 +10,6 @@ import math
 import threading
 import concurrent.futures
 
-#Mask testing
 import cv2
 from matplotlib import pyplot as plt
 import numpy as np
@@ -132,7 +131,6 @@ class Window(Frame):
         self.label1.configure(background='#d7d7d7', text='Size', width='3')
         self.label1.pack(padx='5', pady='5', side='left')
         self.pencil_size_value = tk.StringVar()
-        self.pencil_size_value.trace('w',self.on_field_change)
         self.combobox1 = ttk.Combobox(self.frame1)
         self.combobox1.configure(width='6', textvariable = self.pencil_size_value)
         self.combobox1['values'] = ([i for i in range(1,201,1)])
@@ -573,17 +571,17 @@ class Window(Frame):
                 # Segmentations have to be saved as different variables because otherwise the buttons have the referance to the same segmentation
                 segme01 = segmentations[i]
                 self.mask_canvas1.pack(anchor='center', expand='true', padx='10', pady='10', side='left')
-                self.mask1 = Button(self.mask_canvas1, text = 'Click Me !', image = photo, command = lambda:  [self.edges_panel(image, segme01)])
+                self.mask1 = Button(self.mask_canvas1, text = 'Click Me !', image = photo, command = lambda:  [self.edges_panel(image, segme01), self.set_segmetation_nr(1)])
                 self.mask1.pack(side = LEFT)
             if (i==1):
                 segme02 = segmentations[i]
                 self.mask_canvas2.pack(anchor='center', expand='true', pady='10', side='left')
-                self.mask2 = Button(self.mask_canvas2, text = 'Click Me !', image = photo, command = lambda:  [self.edges_panel(image, segme02)])
+                self.mask2 = Button(self.mask_canvas2, text = 'Click Me !', image = photo, command = lambda:  [self.edges_panel(image, segme02), self.set_segmetation_nr(2)])
                 self.mask2.pack(side = LEFT)
             if (i==2):
                 segme03 = segmentations[i]
                 self.mask_canvas3.pack(anchor='center', expand='true', padx='10', pady='10', side='left')
-                self.mask3 = Button(self.mask_canvas3, text = 'Click Me !', image = photo, command = lambda:  [self.edges_panel(image, segme03)])
+                self.mask3 = Button(self.mask_canvas3, text = 'Click Me !', image = photo, command = lambda:  [self.edges_panel(image, segme03), self.set_segmetation_nr(3)])
                 self.mask3.pack(side = LEFT)
         
         if (seg_length==3):
@@ -594,7 +592,7 @@ class Window(Frame):
             imagetest= Label(self, image= photo)
             imagetest.image= photo
             self.mask_canvas4.pack(anchor='center', expand='true', padx='10', pady='10', side='left')
-            self.mask4 = Button(self.mask_canvas4, text = 'Click Me !', image = photo, command = lambda:  [self.edges_panel(image, segme1)])
+            self.mask4 = Button(self.mask_canvas4, text = 'Click Me !', image = photo, command = lambda:  [self.edges_panel(image, segme1), self.set_segmetation_nr(4)])
             self.mask4.pack(side = LEFT)
             
             # Combination 2
@@ -604,7 +602,7 @@ class Window(Frame):
             imagetest= Label(self, image= photo)
             imagetest.image= photo
             self.mask_canvas5.pack(anchor='center', expand='true', pady='10', side='left')
-            self.mask5 = Button(self.mask_canvas5, text = 'Click Me !', image = photo, command = lambda:  [self.edges_panel(image, segme2)])
+            self.mask5 = Button(self.mask_canvas5, text = 'Click Me !', image = photo, command = lambda:  [self.edges_panel(image, segme2), self.set_segmetation_nr(5)])
             self.mask5.pack(side = LEFT)
             
             # Combination 3
@@ -614,10 +612,15 @@ class Window(Frame):
             imagetest= Label(self, image= photo)
             imagetest.image= photo
             self.mask_canvas6.pack(anchor='center', expand='true', padx='10', pady='10', side='left')
-            self.mask6 = Button(self.mask_canvas6, text = 'Click Me !', image = photo, command = lambda:  [self.edges_panel(image, segme3)])
+            self.mask6 = Button(self.mask_canvas6, text = 'Click Me !', image = photo, command = lambda:  [self.edges_panel(image, segme3), self.set_segmetation_nr(6)])
             self.mask6.pack(side = LEFT)
     
+    def set_segmetation_nr(self, nr):
+        self.mask_nr = nr
+    
     def edges_panel(self, original_image, segmentation):
+        
+        self.button2["state"] = "normal"
         
         self.edges_view()
         
@@ -648,6 +651,22 @@ class Window(Frame):
         self.updateCanvasSize()
     
     def update_edges(self, index, value, op):
+        try:
+            int(self.canny_param_1.get())
+            int(self.canny_param_2.get())
+            int(self.canny_param_3.get())
+            if (int(self.canny_param_3.get()) in [3,5,7]):
+                pass
+            else:
+                return
+            if self.canny_param_4.get()=="False":
+                pass
+            elif self.canny_param_4.get()=="True":
+                pass
+            else:
+                return
+        except:
+            return
         try:
             self.edges_selector.destroy()
         except:
@@ -691,7 +710,7 @@ class Window(Frame):
         file = Menu(menu, tearoff=False)
         
         file.add_command(label="Open File", command=self.open_file)
-        file.add_command(label="Open Project", command=self.open_file)
+        file.add_command(label="Open Project", command=self.open_folder)
         file.add_command(label="Save Project", command=self.save_files)
         #file.add_command(label="Save File", command=quit)
         file.add_command(label="Exit", command=quit)#command=self.client_exit
@@ -713,63 +732,351 @@ class Window(Frame):
         filename = filedialog.askopenfilename(parent=root, title='Choose a file', filetypes=[
             ('image files', ('.png', '.jpg')),])
         if filename:
+            self.button33["state"] = "disabled"
+            self.button32["state"] = "disabled"
+            
+            self.button2["state"] = "disabled"
+            self.button3["state"] = "disabled"
+            global isEditable
+            try:
+                isEditable
+            except NameError:
+                isEditable = False
+            else:
+                isEditable = False
+            self.isFolder = False
+            
             self.masks_panel(filename)
             #self.init_preview_panel(filename)
     
+    def open_folder(self):
+        global imagelabel
+        foldername = filedialog.askdirectory()
+        if foldername:      
+            global isEditable
+            try:
+                isEditable
+            except NameError:
+                isEditable = True
+            else:
+                isEditable = True
+                
+            self.isFolder = True
+            
+            self.project_folder = foldername
+            self.open_project(foldername)
+    
+    def open_project(self, foldername):
+        filename = foldername+"/original" + '.png'
+        if (filename.endswith(".png")):
+            image1 = Image.open(filename)
+            filename = os.path.dirname(os.path.abspath(__file__))+'\\temp\\temp_jpg_img.jpg'
+            filename = filename.replace("\\", "/")
+            image1 = image1.convert('RGB')
+            image1.save(filename)
+        
+        
+        with open(filename, 'rb') as f:
+            np_image_string = np.array([f.read()])
+        
+        image = Image.open(filename)
+        self.original_image = image
+        self.width, self.height = image.size
+        
+        segmentations = modules.detect(np_image_string,self.width,self.height)
+
+        seg_length = len(segmentations)
+        if (len(segmentations)>=3):
+            seg_length = 3
+        
+        # Converting segmentations from 0 and 1 into 0 and 255
+        for i in range(len(segmentations)):
+            segmentations[i] = segmentations[i].astype('uint8')*255
+        
+        self.masks_view()
+        
+        try:
+            self.mask1.destroy()
+            self.mask2.destroy()
+            self.mask3.destroy()
+            self.mask4.destroy()
+            self.mask5.destroy()
+            self.mask6.destroy()
+            self.mask_canvas1.pack_forget()
+            self.mask_canvas2.pack_forget()
+            self.mask_canvas3.pack_forget()
+            self.mask_canvas4.pack_forget()
+            self.mask_canvas5.pack_forget()
+            self.mask_canvas6.pack_forget()
+        except:
+            pass
+        
+        for i in range(seg_length):
+            data = Image.fromarray(segmentations[i])
+            
+            '''
+            if (i==2):
+                data = Image.fromarray(segmentations[0] + segmentations[1] + segmentations[2])
+                segme = segmentations[0] + segmentations[1] + segmentations[2]'''
+            photo= ImageTk.PhotoImage(data)
+            
+            # EXTREMELY CRUTIAL DONT REMOVE
+            imagetest= Label(self, image= photo)
+            imagetest.image= photo
+            if (i==0):
+                # Segmentations have to be saved as different variables because otherwise the buttons have the referance to the same segmentation
+                segme01 = segmentations[i]
+                self.mask_canvas1.pack(anchor='center', expand='true', padx='10', pady='10', side='left')
+                self.mask1 = Button(self.mask_canvas1, text = 'Click Me !', image = photo, command = lambda:  [self.edges_panel(image, segme01)])
+                self.mask1.pack(side = LEFT)
+            if (i==1):
+                segme02 = segmentations[i]
+                self.mask_canvas2.pack(anchor='center', expand='true', pady='10', side='left')
+                self.mask2 = Button(self.mask_canvas2, text = 'Click Me !', image = photo, command = lambda:  [self.edges_panel(image, segme02)])
+                self.mask2.pack(side = LEFT)
+            if (i==2):
+                segme03 = segmentations[i]
+                self.mask_canvas3.pack(anchor='center', expand='true', padx='10', pady='10', side='left')
+                self.mask3 = Button(self.mask_canvas3, text = 'Click Me !', image = photo, command = lambda:  [self.edges_panel(image, segme03)])
+                self.mask3.pack(side = LEFT)
+        
+        if (seg_length==3):
+            # Combination 1
+            data1 = Image.fromarray(segmentations[0] + segmentations[1])
+            segme1 = segmentations[0] + segmentations[1]
+            photo= ImageTk.PhotoImage(data1)
+            imagetest= Label(self, image= photo)
+            imagetest.image= photo
+            self.mask_canvas4.pack(anchor='center', expand='true', padx='10', pady='10', side='left')
+            self.mask4 = Button(self.mask_canvas4, text = 'Click Me !', image = photo, command = lambda:  [self.edges_panel(image, segme1)])
+            self.mask4.pack(side = LEFT)
+            
+            # Combination 2
+            data2 = Image.fromarray(segmentations[2] + segmentations[1])
+            segme2 = segmentations[2] + segmentations[1]
+            photo= ImageTk.PhotoImage(data2)
+            imagetest= Label(self, image= photo)
+            imagetest.image= photo
+            self.mask_canvas5.pack(anchor='center', expand='true', pady='10', side='left')
+            self.mask5 = Button(self.mask_canvas5, text = 'Click Me !', image = photo, command = lambda:  [self.edges_panel(image, segme2)])
+            self.mask5.pack(side = LEFT)
+            
+            # Combination 3
+            data3 = Image.fromarray(segmentations[0] + segmentations[2])
+            segme3 = segmentations[0] + segmentations[2]
+            photo= ImageTk.PhotoImage(data3)
+            imagetest= Label(self, image= photo)
+            imagetest.image= photo
+            self.mask_canvas6.pack(anchor='center', expand='true', padx='10', pady='10', side='left')
+            self.mask6 = Button(self.mask_canvas6, text = 'Click Me !', image = photo, command = lambda:  [self.edges_panel(image, segme3)])
+            self.mask6.pack(side = LEFT)
+        
+        lines = []
+        with open(foldername+"/conf" + '.txt') as f:
+            lines = f.readlines()
+        self.mask_nr = 1
+        for line in lines:
+            param,value = line.split(":")
+            if (param == "mask"):
+                self.mask_nr = int(value)
+            if (param == "distance"):
+                self.distance_value.set(value.rstrip("\n"))
+            if (param == "radius"):
+                self.radius_value.set(value.rstrip("\n"))
+            if (param == "noise"):
+                self.noise_value.set(value.rstrip("\n"))
+            if (param == "cv2_p1"):
+                self.canny_param_1.set(value.rstrip("\n"))
+            if (param == "cv2_p2"):
+                self.canny_param_2.set(value.rstrip("\n"))
+            if (param == "apeture"):
+                self.canny_param_3.set(value.rstrip("\n"))
+            if (param == "L2"):
+                self.canny_param_4.set(value.rstrip("\n"))
+                
+        self.button2["state"] = "normal"
+        
+        self.edges_view()
+        
+        try:
+            self.edges_selector.destroy()
+        except:
+            pass
+        
+        original_image = image
+        if (self.mask_nr == 1):
+            segment = segme01
+        if (self.mask_nr == 2):
+            segment = segme02
+        if (self.mask_nr == 3):
+            segment = segme03
+        if (self.mask_nr == 4):
+            segment = segme1
+        if (self.mask_nr == 5):
+            segment = segme2
+        if (self.mask_nr == 6):
+            segment = segme3
+        
+        self.original_image = original_image
+        image = np.array(original_image)
+        self.seg = segment # one may have to chose 1,2 or 3 shapes here
+        self.seg[np.where(self.seg>0) ]=1
+        for l in range(3):
+            image[:,:,l]= image[:,:,l]*self.seg
+        edges_out = cv2.Canny(self.seg,1,1) # segment outer edge, some images may look better not including this
+        image = cv2.blur(image, (3,3))
+        edges = cv2.Canny(image,int(self.canny_param_1.get()),int(self.canny_param_2.get())) # the parameters of this is one choice that user may have to make # 80, 200
+        edges = edges | edges_out # again some images may look better without the outser edge
+        
+        photo = ImageTk.PhotoImage(Image.fromarray(edges))
+        
+        # EXTREMELY CRUTIAL DONT REMOVE
+        imagetest= Label(self, image= photo)
+        imagetest.image= photo
+        self.edges_selector = Button(self.edges_canvas, text = 'Click Me !', image = photo, command = lambda:  [self.editor_mode(image, segment)])
+        self.edges_selector.pack(side = LEFT)
+        
+        self.updateCanvasSize()
+        self.editor_mode(image, segment)
+
+        
     def save_files(self):
         global imagelabel
         #foldername = filedialog.askdirectory()
-        folderlocation = filedialog.asksaveasfilename(filetypes=[('All Files', '*.*')])
-        if folderlocation:
-            try:
-                if (isEditable==True):
-                    directory = folderlocation.split("/")
-                    foldername = directory[-1]
-                    directory = directory[:-1]
-                    directory = "/".join(directory)
-                    
-                    # Path
-                    path = os.path.join(directory, foldername)
-                    # Create directory
-                    os.mkdir(path)
-                    
-                    self.original_image.save(folderlocation+"/original" + '.png', 'png')
-                    
-                    #Need to add folder location
-                    ps = self.canvas1.postscript()#file = "canvas1_temp.ps"                         
-                    im = self.open_eps(ps, dpi=144)#144 was the only number that wouldnt create issues
-                    im.save(folderlocation+"/edges.ps", dpi=(144, 144))#119.5
-                    img = Image.open(folderlocation+"/edges" + '.ps')
-                    w, h = img.size
-                    img = img.crop([1, 0, w-2, h-3])
-                    img.save(folderlocation+"/edges" + '.png', 'png')
-                    os.remove(folderlocation+"/edges" + '.ps')
-                    #print(str(self.width) +" "+ str(self.height))
-                    #print(img.size)
-                    # Dotted
-                    ps = self.canvas2.postscript()#file = "canvas1_temp.ps"                         
-                    im = self.open_eps(ps, dpi=144)#144 was the only number that wouldnt create issues
-                    im.save(folderlocation+"/dotted.ps", dpi=(144, 144))#119.5
-                    img = Image.open(folderlocation+"/dotted" + '.ps')
-                    w, h = img.size
-                    img = img.crop([1, 0, w-2, h-3])
-                    img.save(folderlocation+"/dotted" + '.png', 'png')
-                    os.remove(folderlocation+"/dotted" + '.ps')
-                    # Final
-                    ps = self.canvas3.postscript()#file = "canvas1_temp.ps"                         
-                    im = self.open_eps(ps, dpi=144)#144 was the only number that wouldnt create issues
-                    im.save(folderlocation+"/final.ps", dpi=(144, 144))#119.5
-                    img = Image.open(folderlocation+"/final" + '.ps')
-                    w, h = img.size
-                    img = img.crop([1, 0, w-2, h-3])
-                    img.save(folderlocation+"/final" + '.png', 'png')
-                    os.remove(folderlocation+"/final" + '.ps')
-            except NameError:
-                pass
+        if (self.isFolder):
+            lines = ['mask:'+str(self.mask_nr)+'\n', 'distance:'+self.distance_value.get()+'\n', 'radius:'+self.radius_value.get()+'\n', 'noise:'+self.noise_value.get()+'\n', 'cv2_p1:'+self.canny_param_1.get()+'\n', 'cv2_p2:'+self.canny_param_2.get()+'\n', 'apeture:'+self.canny_param_3.get()+'\n', 'L2:'+self.canny_param_4.get()]
+            with open(self.project_folder+'/conf'+'.txt', 'w') as f:
+                for line in lines:
+                    f.write(line)
+            folderlocation = self.project_folder
+            
+            self.original_image.save(folderlocation+"/original" + '.png', 'png')
+            
+            #Need to add folder location
+            ps = self.canvas1.postscript()#file = "canvas1_temp.ps"                         
+            im = self.open_eps(ps, dpi=144)#144 was the only number that wouldnt create issues
+            im.save(folderlocation+"/edges.ps", dpi=(144, 144))#119.5
+            img = Image.open(folderlocation+"/edges" + '.ps')
+            w, h = img.size
+            img = img.crop([1, 0, w-2, h-3])
+            img.save(folderlocation+"/edges" + '.png', 'png')
+            os.remove(folderlocation+"/edges" + '.ps')
+            #print(str(self.width) +" "+ str(self.height))
+            #print(img.size)
+            # Dotted
+            ps = self.canvas2.postscript()#file = "canvas1_temp.ps"                         
+            im = self.open_eps(ps, dpi=144)#144 was the only number that wouldnt create issues
+            im.save(folderlocation+"/dotted.ps", dpi=(144, 144))#119.5
+            img = Image.open(folderlocation+"/dotted" + '.ps')
+            w, h = img.size
+            img = img.crop([1, 0, w-2, h-3])
+            img.save(folderlocation+"/dotted" + '.png', 'png')
+            os.remove(folderlocation+"/dotted" + '.ps')
+            # Final
+            ps = self.canvas3.postscript()#file = "canvas1_temp.ps"                         
+            im = self.open_eps(ps, dpi=144)#144 was the only number that wouldnt create issues
+            im.save(folderlocation+"/final.ps", dpi=(144, 144))#119.5
+            img = Image.open(folderlocation+"/final" + '.ps')
+            w, h = img.size
+            img = img.crop([1, 0, w-2, h-3])
+            img.save(folderlocation+"/final" + '.png', 'png')
+            os.remove(folderlocation+"/final" + '.ps')
+        else:
+            if (isEditable==True):
+                folderlocation = filedialog.asksaveasfilename(filetypes=[('All Files', '*.*')])
+                if folderlocation:
+                    try:
+                        if (isEditable==True):
+                            directory = folderlocation.split("/")
+                            foldername = directory[-1]
+                            directory = directory[:-1]
+                            directory = "/".join(directory)
+                            
+                            # Path
+                            path = os.path.join(directory, foldername)
+                            # Create directory
+                            os.mkdir(path)
+                            
+                            self.original_image.save(folderlocation+"/original" + '.png', 'png')
+                            
+                            #Need to add folder location
+                            ps = self.canvas1.postscript()#file = "canvas1_temp.ps"                         
+                            im = self.open_eps(ps, dpi=144)#144 was the only number that wouldnt create issues
+                            im.save(folderlocation+"/edges.ps", dpi=(144, 144))#119.5
+                            img = Image.open(folderlocation+"/edges" + '.ps')
+                            w, h = img.size
+                            img = img.crop([1, 0, w-2, h-3])
+                            img.save(folderlocation+"/edges" + '.png', 'png')
+                            os.remove(folderlocation+"/edges" + '.ps')
+                            #print(str(self.width) +" "+ str(self.height))
+                            #print(img.size)
+                            # Dotted
+                            ps = self.canvas2.postscript()#file = "canvas1_temp.ps"                         
+                            im = self.open_eps(ps, dpi=144)#144 was the only number that wouldnt create issues
+                            im.save(folderlocation+"/dotted.ps", dpi=(144, 144))#119.5
+                            img = Image.open(folderlocation+"/dotted" + '.ps')
+                            w, h = img.size
+                            img = img.crop([1, 0, w-2, h-3])
+                            img.save(folderlocation+"/dotted" + '.png', 'png')
+                            os.remove(folderlocation+"/dotted" + '.ps')
+                            # Final
+                            ps = self.canvas3.postscript()#file = "canvas1_temp.ps"                         
+                            im = self.open_eps(ps, dpi=144)#144 was the only number that wouldnt create issues
+                            im.save(folderlocation+"/final.ps", dpi=(144, 144))#119.5
+                            img = Image.open(folderlocation+"/final" + '.ps')
+                            w, h = img.size
+                            img = img.crop([1, 0, w-2, h-3])
+                            img.save(folderlocation+"/final" + '.png', 'png')
+                            os.remove(folderlocation+"/final" + '.ps')
+                            
+                            lines = ['mask:'+str(self.mask_nr)+'\n', 'distance:'+self.distance_value.get()+'\n', 'radius:'+self.radius_value.get()+'\n', 'noise:'+self.noise_value.get()+'\n', 'cv2_p1:'+self.canny_param_1.get()+'\n', 'cv2_p2:'+self.canny_param_2.get()+'\n', 'apeture:'+self.canny_param_3.get()+'\n', 'L2:'+self.canny_param_4.get()]
+                            with open(folderlocation+'/conf'+'.txt', 'w') as f:
+                                for line in lines:
+                                    f.write(line)
+                    except NameError:
+                        pass
     
     
     
     def editor_mode(self, original_image, segmentation):
+        
+        try:
+            try:
+                int(self.canny_param_1.get())
+            except:
+                self.canny_param_1.set("80")
+            try:
+                int(self.canny_param_2.get())
+            except:
+                self.canny_param_2.set("200")
+            try:
+                int(self.canny_param_3.get())
+            except:
+                self.canny_param_3.set("3")
+            if (int(self.canny_param_3.get()) in [3,5,7]):
+                pass
+            else:
+                self.canny_param_3.set("3")
+            if self.canny_param_4.get()=="False":
+                pass
+            elif self.canny_param_4.get()=="True":
+                pass
+            else:
+                self.canny_param_4.set("True")
+            try:
+                int(self.distance_value.get())
+            except:
+                self.distance_value.set("10")
+            try:
+                int(self.radius_value.get())
+            except:
+                self.radius_value.set("2")
+            try:
+                float(self.noise_value.get())
+            except:
+                self.noise_value.set("0.001")
+        except:
+            pass
         
         self.frame02.pack(anchor='center', expand='true', fill='both', side='top')
         self.frame03.pack_forget()
@@ -790,6 +1097,7 @@ class Window(Frame):
             pass
         self.canvas1.delete("all")
         
+        self.button3["state"] = "normal"
         self.button33["state"] = "normal"
         self.button32["state"] = "normal"
         
@@ -807,12 +1115,12 @@ class Window(Frame):
         self.canvas1.config(width=self.photo_edges.width()-2, height=self.photo_edges.height()-2)
         self.canvas1.create_image(0, 0, image = self.photo_edges, anchor = NW, tag = "edges")
         
-        dotted = modules.generate_image_dotted(edges,10,2)
+        dotted = modules.generate_image_dotted(edges,int(self.distance_value.get()),int(self.radius_value.get()))
         self.photo_dotted = ImageTk.PhotoImage(dotted)
         self.canvas2.config(width=self.photo_dotted.width()-2, height=self.photo_dotted.height()-2)
         self.canvas2.create_image(0, 0, image = self.photo_dotted, anchor = NW)
         
-        final = modules.add_noise(dotted,prob = 0.001,dot =2 )
+        final = modules.add_noise(dotted,prob = float(self.noise_value.get()),dot =int(self.radius_value.get()) )
         self.photo_final = ImageTk.PhotoImage(Image.fromarray(final))
         self.canvas3.config(width=self.photo_final.width()-2, height=self.photo_final.height()-2)
         self.canvas3.create_image(0, 0, image = self.photo_final, anchor = NW)
@@ -888,6 +1196,12 @@ class Window(Frame):
                 self.update_canvas()
     
     def update_canvas(self):
+        try:
+            int(self.distance_value.get())
+            int(self.radius_value.get())
+            float(self.noise_value.get())
+        except:
+            return
         ps = self.canvas1.postscript()#file = "canvas1_temp.ps"                         
 
         """ canvas postscripts seem to be saved at 0.60 scale, so we need to increase the default dpi (72) by 60 percent """

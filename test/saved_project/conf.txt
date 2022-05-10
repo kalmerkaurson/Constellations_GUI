@@ -1,0 +1,8 @@
+mask:6
+distance:10
+radius:2
+noise:0.001
+cv2_p1:80
+cv2_p2:200
+apeture:3
+L2:False
