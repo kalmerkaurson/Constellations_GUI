@@ -1217,6 +1217,9 @@ class Window(Frame):
         edges = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 
         dotted = modules.generate_image_dotted(edges,int(self.distance_value.get()),int(self.radius_value.get()))
+        
+        os.remove("tester" + '.png')
+        os.remove("tester" + '.ps')
         self.photo_dotted = ImageTk.PhotoImage(dotted)
         self.canvas2.config(width=self.photo_dotted.width()-2, height=self.photo_dotted.height()-2)
         self.canvas2.create_image(0, 0, image = self.photo_dotted, anchor = NW)
